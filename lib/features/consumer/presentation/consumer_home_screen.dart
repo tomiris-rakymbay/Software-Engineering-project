@@ -13,6 +13,11 @@ import '../../linking/data/supplier_model.dart';
 
 import '../../consumer/data/notification_provider.dart';
 
+import 'package:supplier_consumer_app/features/chat/presentation/chat_list_screen.dart';
+
+import '../../chat/presentation/chat_list_screen.dart';
+import '../../auth/data/auth_providers.dart';
+
 class ConsumerHomeScreen extends ConsumerWidget {
   const ConsumerHomeScreen({super.key});
 
@@ -20,11 +25,12 @@ class ConsumerHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(consumerNavIndexProvider);
 
-    final pages = const [
-      _HomeOverviewPage(),
-      _LinkedSuppliersPage(),
-      _NotificationsPage(),
-      ConsumerProfilePage(),
+    final pages = [
+      const _HomeOverviewPage(),
+      const _LinkedSuppliersPage(),
+      const _NotificationsPage(),
+      const ChatListEntryPage(), // ADD THIS
+      const ConsumerProfilePage(),
     ];
 
     return Scaffold(
@@ -42,6 +48,7 @@ class ConsumerHomeScreen extends ConsumerWidget {
             icon: Icon(Icons.notifications),
             label: "Notifications",
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chats"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
@@ -370,5 +377,27 @@ class _ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return const Center(child: Text("Profile", style: TextStyle(fontSize: 22)));
+  }
+}
+
+class ChatListEntryPage extends ConsumerWidget {
+  const ChatListEntryPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.read(authRepositoryProvider);
+
+    return FutureBuilder(
+      future: Future.wait([auth.getUserId(), auth.getUserName()]),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData)
+          return Center(child: CircularProgressIndicator());
+
+        final myId = snapshot.data![0] ?? "";
+        final myName = snapshot.data![1] ?? "";
+
+        return ChatListScreen(myId: myId, myName: myName);
+      },
+    );
   }
 }

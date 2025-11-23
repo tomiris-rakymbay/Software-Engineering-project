@@ -73,4 +73,9 @@ class AuthRepository {
     await prefs.remove(_keyUserName);
     await prefs.remove(_keyUserEmail);
   }
+
+  Future<String> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUserEmail) ?? "unknown";
+  }
 }
